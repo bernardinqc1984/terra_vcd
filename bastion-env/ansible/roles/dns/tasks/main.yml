@@ -1,0 +1,241 @@
+- name: Install needed packages bastion-vm
+  package:
+    name: "{{ packages }}"
+    state: present
+  tags: rpm
+
+  # Setup named configuration files
+- name: Installing DNS Serialnumber generator
+  copy:
+    src: set-dns-serial.sh
+    dest: /usr/local/bin/set-dns-serial.sh
+    mode: '0555'
+  tags: dns
+
+- name: Set zone serial number
+  shell: "/usr/local/bin/set-dns-serial.sh"
+  register: dymanicserialnumber
+  check_mode: false
+  tags: dns
+
+- name: Setting serial number as a fact
+  set_fact:
+    serialnumber: "{{ dymanicserialnumber.stdout }}"
+  tags: dns
+
+- name: Write out "{{ dns.domain | lower }}" zone file
+  template:
+    src: ../templates/zonefile.j2
+    dest: /var/named/zonefile.db
+    mode: '0644'
+  notify:
+    - restart bind
+
+- name: Write out reverse zone file
+  template:
+    src: ../templates/reverse.j2
+    dest: /var/named/reverse.db
+    mode: '0644'
+  notify:
+     - restart bind
+
+- name: Write out 0.16.172 reverse zone file
+  template:
+    src: '../templates/reverse_0.16.172.j2'
+    dest: /var/named/0.16.172.db
+    mode: '0644'
+  notify:
+    - restart bind
+  register: named
+  tags: dns
+
+- name: Write out 255.16.172 reverse zone file
+  template:
+    src: '../templates/reverse_255.16.172.j2'
+    dest: /var/named/255.16.172.db
+    mode: '0644'
+  notify:
+    - restart bind
+  register: named
+  tags: dns
+
+- name: Write out named file
+  template:
+    src: 'templates/named.conf.j2'
+    dest: /etc/named.conf
+  notify:
+    - restart bind
+  tags: dns
+
+- name: Start firewalld service
+  systemd:
+    name: firewalld
+    state: started
+    enabled: yes
+  tags: firewall
+
+- name: Open up firewall ports
+  firewalld:
+    permanent: yes
+    immediate: yes
+    state: enabled
+    port: "{{ item[0] }}"
+  delegate_to: "{{ item[1] }}"
+  run_once: true
+  with_nested:
+    - "{{ ports }}"
+    - "{{ ansible_play_batch }}"
+  tags: firewall
+
+- name: Install packages for DHCP install
+  package:
+    name: "{{ dhcppkgs }}"
+    state: present
+  tags: dhcp
+
+- name: Write out dhcp file
+  template:
+    src: dhcpd.conf.j2
+    dest: /etc/dhcp/dhcpd.conf
+  notify:
+    - restart dhcpd
+  tags: dhcpd
+
+- name: Create a directory if it does not exist
+  file:
+    path: /home/cirrus/certbot/
+    state: directory
+    mode: '0750'
+    owner: "cirrus"
+  tags: certbot
+
+- name: Certbot create script
+  template:
+    src: certbot_create.j2
+    dest: /home/cirrus/certbot/create.sh
+    mode: '0750'
+    owner: "cirrus"
+  tags: certbot
+
+- name: Certbot renew script
+  template:
+    src: certbot_renew.j2
+    dest: /home/cirrus/certbot/renew.sh
+    mode: '0750'
+    owner: "cirrus"
+  tags: certbot
+
+- name: Create a directory if it does not exist
+  file:
+    path: /home/cirrus/certbot/cloudflare/
+    state: directory
+    mode: '0750'
+    owner: "cirrus"
+  tags: certbot
+
+- name: Installing cloudflare
+  copy:
+    src: cloudflare
+    dest: /home/cirrus/certbot/cloudflare/credentials
+    owner: "cirrus"
+    mode: '0600'
+  tags: certbot
+
+# install kubectl 
+- name: Downloading kubectl
+  shell: |
+    cd /usr/local/src/
+    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    chmod 755 kubectl
+    mv kubectl /usr/local/bin/
+  args:
+    creates: /usr/local/bin/kubectl
+  tags: kubectl
+  ignore_errors: true
+
+- name: Downloading kubectl completion
+  shell: |
+    kubectl completion bash | sudo tee /etc/bash_completion.d/kubectl > /dev/null
+  args:
+    creates: /etc/bash_completion.d/kubectl
+  tags: kubectl
+
+- name: Downloading kubectl completion for cirrus
+  shell: |
+    sudo -i -u {{ item }} -- echo 'complete -o default -F __start_kubectl k' >>~/.bashrc
+  with_items: "{{ cirrus_admin }}"
+  args:
+    creates: /home/{{ item }}/.bashrc
+  tags: kubectl
+
+# OpenTofu cli
+
+- name: install opentofu
+  shell: |
+    cd /usr/local/src/ 
+    curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh 
+    chmod +x install-opentofu.sh 
+    ./install-opentofu.sh --install-method rpm 
+    rm install-opentofu.sh 
+    
+- name: Install Ansible
+  shell: |
+    sudo -i -u {{ item }} -- pip3 install --upgrade --user ansible-core
+    sudo -i -u {{ item }} -- pip3 install pyvcloud lxml requests kubernetes
+    sudo -i -u {{ item }} -- ansible-galaxy collection install kubernetes.core ansible.posix ansible.utils community.crypto
+  args:
+    creates: /home/{{ item }}/.local/bin/ansible
+  with_items: "{{ cirrus_admin }}"
+  tags: ansible
+
+- name: Create Ansible PATH
+  shell: |
+    sudo -i -u {{ item }} -- echo 'export PATH=$PATH:/home/{{ item }}/.local/bin' | tee -a ~/.bashrc
+    source ~/.bashrc
+  with_items: "{{ cirrus_admin }}"
+  args:
+    creates: /home/{{ item }}/.bashrc
+  tags: ansible
+
+- name: Install vcd
+  shell: |
+    sudo -i -u {{ item }} -- pip3 install --upgrade --user pip
+    sudo -i -u {{ item }} -- pip3 install --user vcd-cli
+  args:
+    creates: /home/{{ item }}/.local/bin/vcd
+  with_items: "{{ cirrus_admin }}"
+  tags: vcd
+
+- name: Install netaddr python module
+  shell: |
+    sudo -i -u {{ item }} -- pip3 install --upgrade --user netaddr
+  args:
+    creates: /home/{{ item }}/.local/lib/python3.9/site-packages/netaddr
+  with_items: "{{ cirrus_admin }}"
+  tags: netaddr
+
+- name: install nmcli module
+  shell: |
+    sudo -i -u {{ item }} -- ansible-galaxy collection install community.general
+  args:
+    creates: /home/{{ item }}/.ansible/collections/ansible_collections/community/general
+  with_items: "{{ cirrus_admin }}"
+  tags: nmcli
+
+
+- name: Starting services
+  service:
+    name: "{{ item }}"
+    enabled: yes
+    state: started
+  with_items:
+    - named
+    - dhcpd
+    - chronyd
+
+  tags:
+    - named
+    - dhcpd
+    - ntp
+
+

@@ -1,0 +1,54 @@
+{
+  "ignition": {
+    "version": "3.3.0"
+  },
+  "passwd": {
+    "users": [
+      {
+        "groups": [
+          "docker",
+          "sudo"
+        ],
+        "name": "core",
+        "passwordHash": "$2y$10$GTZ/1rQpCgeKL39qy4un6.IM3bag86TnjUlsX0PXTQgBqljfNpZse",
+        "sshAuthorizedKeys": [
+          "ssh-rsa PUBLIC_KEY"
+        ]
+      }
+    ]
+  },
+  "storage": {
+    "files": [
+      {
+        "overwrite": true,
+        "path": "/etc/flatcar/update.conf",
+        "contents": {
+          "compression": "",
+          "source": "data:,REBOOT_STRATEGY%3Doff%0A"
+        },
+        "mode": 272
+      },
+      {
+        "path": "/etc/motd.d/pi.conf",
+        "contents": {
+          "compression": "",
+          "source": "data:,This%20machine%20is%20dedicated%20to%20computing%20kubernetes"
+        },
+        "mode": 420
+      }
+    ]
+  },
+  "systemd": {
+    "units": [
+      {
+        "dropins": [
+          {
+            "contents": "[Service]\nExecStart=\nExecStart=-/sbin/agetty --noclear %I $TERM\n",
+            "name": "10-autologin.conf"
+          }
+        ],
+        "name": "getty@.service"
+      }
+    ]
+  }
+}

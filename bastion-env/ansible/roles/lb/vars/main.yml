@@ -1,0 +1,9 @@
+packages:
+  - haproxy
+  - ansible
+  - vim
+  - screen
+  - wget
+  - curl
+  - net-tools
+

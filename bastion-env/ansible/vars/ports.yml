@@ -1,0 +1,21 @@
+ports:
+- 22/tcp
+- 67/udp
+- 68/udp
+- 123/udp
+- 53/tcp
+- 53/udp
+- 443/tcp
+- 80/tcp
+- 8080/tcp
+- 6443/tcp # Kubernetes API
+- 2379/tcp # etcd
+- 2380/tcp # etcd
+- 10250/tcp # Kubelet
+- 10256/tcp # Kube-proxy
+- 10259/tcp # kube-scheduler
+- 10257/tcp # kube-controller-manager
+- 30000-32767/tcp # NodePort Services
+- 9000/tcp
+- 69/udp
+

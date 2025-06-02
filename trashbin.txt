@@ -1,0 +1,1574 @@
+/*
+output "k8s_dns_details" {
+  value = {
+    id                  = vcd_nsxt_edgegateway_dns.k8s_dns.id
+    org                 = vcd_nsxt_edgegateway_dns.k8s_dns.org
+    edge_gateway_id     = vcd_nsxt_edgegateway_dns.k8s_dns.edge_gateway_id
+    enabled             = vcd_nsxt_edgegateway_dns.k8s_dns.enabled
+    default_forwarder   = vcd_nsxt_edgegateway_dns.k8s_dns.default_forwarder_zone
+    conditional_forward = vcd_nsxt_edgegateway_dns.k8s_dns.conditional_forwarder_zone
+  }
+  description = "Details of the Kubernetes DNS configuration on the edge gateway"
+}
+*/
+ 
+# Retrieve kubernetes network app port profile
+data "vcd_nsxt_app_port_profile" "kubernetes_net" {
+  scope = "SYSTEM"
+  name  = "Kubernetes Network"
+}
+ 
+   app_port_profile_ids = [vcd_nsxt_app_port_profile.haproxyadmin.id]
+ 
+readonly 
+ 
+openshift_dev_nsxt T1 Edge
+ 
+https://vcloud-qbc1.cirrusproject.ca/api
+ 
+${VCD_ORG}-${DC}-${VCD_VDC}
+ 
+openshift_dev_nsxt T1 Edge
+ 
+vdc  = var.vcd_vdc
+ 
+mygateway.id
+ 
+  default     = ""
+ 
+#retrieve edge gateway name
+ 
+data "vcd_resource_list" "edge_gateway_name" {
+  org          = var.vcd_org
+  vdc          = var.vcd_vdc
+  name          = "edge_gateway_name"
+  resource_type = "vcd_edgegateway" # find gateway name
+  list_mode     = "name"
+}
+
+data "vcd_nsxt_edgegateway" "mygateway" {
+  org          = var.vcd_org
+  vdc          = var.vcd_vdc
+  name          = element(data.vcd_resource_list.edge_gateway_name.list,1)
+
+}
+ 
+data "vcd_resource_list" "edge_gateway_name" {
+  org          = var.vcd_org
+  vdc          = var.vcd_vdc
+  name          = "edge_gateway_name"
+  resource_type = "vcd_edgegateway" # find gateway name
+  list_mode     = "name"
+}
+
+data "vcd_nsxt_edgegateway" "mygateway" {
+  org          = var.vcd_org
+  vdc          = var.vcd_vdc
+  name          = element(data.vcd_resource_list.edge_gateway_name.list,1)
+
+}
+ 
+vcd_org = "openshift_dev"
+ 
+data "vcd_nsxt_app_port_profile" "dns-tcp" {
+
+  context_id = data.vcd_nsxt_edgegateway.mygateway.id
+
+  #context_id = data.vcd_nsxt_edgegateway.mygw.id
+  scope = "TENANT"
+  name  = "DNS-TCP"
+}
+ 
+
+data "vcd_nsxt_app_port_profile" "dhcp-client" {
+  
+  context_id = data.vcd_nsxt_edgegateway.mygateway.id
+  #context_id = data.vcd_nsxt_edgegateway.mygw.id
+  scope = "TENANT"
+  name  = "DHCP-Client"
+}
+
+data "vcd_nsxt_app_port_profile" "dhcp-server" {
+
+  context_id = data.vcd_nsxt_edgegateway.mygateway.id
+  #context_id = data.vcd_nsxt_edgegateway.mygw.id
+  scope = "TENANT"
+  name  = "DHCP-Server"
+}
+ 
+data "vcd_nsxt_app_port_profile" "dhcp-client" {
+  
+  context_id = data.vcd_nsxt_edgegateway.mygateway.id
+  #context_id = data.vcd_nsxt_edgegateway.mygw.id
+  scope = "TENANT"
+  name  = "DHCP-Client"
+}
+ 
+
+data "vcd_nsxt_app_port_profile" "dns-udp" {
+
+  context_id = data.vcd_nsxt_edgegateway.mygateway.id
+  #context_id = data.vcd_nsxt_edgegateway.mygw.id
+  scope = "TENANT"
+  name  = "DNS-UDP"
+}
+ 
+https://daldir01.vmware-solutions.cloud.ibm.com/api
+ 
+<your org id>
+ 
+vdc-openshift_dev_nsxt-other
+ 
+// Base domain from which the cluster domain is a subdomain.
+base_domain = "<your base domain>"
+ 
+cluster_id = "<your cluster id"
+ 
+ttps://daldir01.vmware-solutions.cloud.ibm.com/api
+ 
+
+
+    fw_rules = object({
+      allow_ssh_source = list(string)
+    })
+ 
+ 
+
+    fw_rules = object({
+      allow_ssh_source = list(string)
+    })
+  })
+ 
+    })
+ 
+transit = object({
+      subnet     = string
+      gateway    = string
+      prefix     = number
+      dns_server = list(string)
+      #static_ips = string
+    })
+    shared = object({
+      subnet     = string
+      gateway    = string
+      prefix     = number
+      dns_server = list(string)
+      jumpbox_ip = string
+      ns_ips     = list(string)
+      helper = object({
+        enabled  = bool
+        ip       = string
+        template = string
+      })
+ 
+kubernetes = object({
+      subnet     = string
+      gateway    = string
+      prefix     = number
+      dns_server = list(string)
+      #static_ips = string
+    })
+ 
+
+ç
+ 
+kubernetes = {
+    subnet = "172.16.1.0/24"
+    gateway = "172.16.1.1"
+    prefix = "24"
+    dns_server = ["1.1.1.1", "1.0.0.1"]
+  }
+  transit = {
+    subnet = "172.16.255.0/24"
+    gateway = "172.16.255.1"
+    prefix = "26"
+    dns_server = ["1.1.1.1", "1.0.0.1"]
+  }
+  shared = {
+    subnet = "172.16.0.0/26"
+    gateway = "172.16.0.1"
+    prefix = "24"
+    dns_server = ["1.1.1.1", "1.0.0.1"]
+    jumpbox_ip = "172.16.0.15"
+    ns_ips = ["172.16.0.15"]
+    helper = {
+      enabled = "false"
+      ip = "172.16.0.15"
+      template = "helper-vapp"
+    }
+  }
+    fw_rules = {
+      allow_ssh_source = ["64.187.176.220", "24.201.161.72", "130.41.67.101"]
+    }
+ 
+    external_network = object({
+      name = string
+      ip   = string
+    })
+ 
+
+
+variable "networking_transit_subnet" {
+  description = "The subnet for the Transit network"
+  type        = string
+}
+
+variable "networking_shared_subnet" {
+  description = "The subnet for the Shared network"
+  type        = string
+}
+ 
+variable "networking_edge_gateway" {
+  description = "The name of the edge gateway"
+  type        = string
+}
+
+variable "networking_fw_rules_allow_ssh_source" {
+  description = "IP addresses allowed to SSH into the jumpbox"
+  type        = list(string)
+}
+
+variable "vcd_external_network_ip" {
+  description = "The external network IP address"
+  type        = string
+}
+
+variable "services_lb_vip_ip" {
+  description = "The VIP IP address for the load balancer"
+  type        = string
+}
+
+variable "networking_kubernetes_subnet" {
+  description = "The subnet for the Kubernetes network"
+  type        = string
+ 
+/*
+resource "vcd_nsxt_app_port_profile" "ntp" {
+  scope = "TENANT"
+  name  = "NTP"
+
+  app_port {
+    protocol = "UDP"
+    port     = ["123"]
+  }
+
+  description = "NTP Application Port Profile"
+}
+*/
+ 
+/*
+resource "vcd_nsxt_app_port_profile" "dhcp" {
+  context_id = data.vcd_nsxt_edgegateway.mygw.id
+  scope = "TENANT"
+  name  = "DHCP"
+
+  app_port {
+    protocol = "UDP"
+    port     = ["67", "68"]
+  }
+
+  description = "DHCP Application Port Profile"
+}
+*/
+ 
+data "vcd_nsxt_app_port_profile" "icmp" {
+  context_id = data.vcd_nsxt_edgegateway.mygw.id
+  scope = "TENANT"
+  name  = "ICMP"
+}
+ 
+ app_port {
+    protocol = "TCP"
+    port     = ["53"]
+  }
+ 
+  org = var.vcd.org
+ 
+context_id = data.vcd_org_vdc.vdc.id
+ 
+  org = var.vcd.org
+ 
+
+  description = "DNS Application Port Profile"
+}
+ 
+
+  app_port {
+    protocol = "UDP"
+    port     = ["53"]
+ 
+# Profils de ports natifs
+data "vcd_nsxt_app_port_profile" "http" {
+  scope = "SYSTEM"
+  name  = "HTTP"
+}
+
+data "vcd_nsxt_app_port_profile" "https" {
+  scope = "SYSTEM"
+  name  = "HTTPS"
+}
+
+data "vcd_nsxt_app_port_profile" "ssh" {
+  scope = "SYSTEM"
+  name  = "SSH"
+}
+
+resource "vcd_nsxt_app_port_profile" "dns" {
+  scope = "TENANT"
+  name  = "DNS"
+
+  app_port {
+    protocol = "UDP"
+    port     = ["53"]
+  }
+
+  description = "DNS Application Port Profile"
+}
+
+resource "vcd_nsxt_app_port_profile" "dhcp" {
+  scope = "TENANT"
+  name  = "DHCP"
+
+  app_port {
+    protocol = "UDP"
+    port     = ["67", "68"]
+  }
+
+  description = "DHCP Application Port Profile"
+}
+
+resource "vcd_nsxt_app_port_profile" "ntp" {
+  scope = "TENANT"
+  name  = "NTP"
+
+  app_port {
+    protocol = "UDP"
+    port     = ["123"]
+  }
+
+  description = "NTP Application Port Profile"
+}
+
+# Custom app port profile for non-standard services (e.g., HTTP on port 8080)
+resource "vcd_nsxt_app_port_profile" "http_8080" {
+  scope = "TENANT"
+  name  = "HTTP-8080-Custom"
+
+  app_port {
+    protocol = "TCP"
+    port     = ["8080"]
+  }
+
+  description = "Custom HTTP service on port 8080"
+}
+
+# Profils personnalisés
+resource "vcd_nsxt_app_port_profile" "haproxyadmin" {
+  org = var.vcd.org
+  
+  name  = "HAProxy admin Port"
+  description = "Port for HAProxy admin access"
+
+  scope = "TENANT"
+
+  app_port {
+    protocol = "TCP"
+    port     = ["9000"]
+  }
+}
+
+resource "vcd_nsxt_app_port_profile" "api" {
+  org = var.vcd.org
+
+  name  = "Custom_api_6443"
+  description = "Port for API access"
+
+  scope = "TENANT"
+
+  app_port {
+    protocol = "TCP"
+    port     = ["6443"]
+  }
+}
+
+resource "vcd_nsxt_app_port_profile" "custom_ssh_8446" {
+  org = var.vcd.org
+  
+  name  = "Custom_ssh_8446"
+  description = "Custom SSH Port"
+
+  scope = "TENANT"
+  
+  app_port {
+    protocol = "TCP"
+    port     = ["8446"]
+  }
+  
+}
+ 
+eadonly
+ 
+"ssh-rsa PUBLIC_KEY"
+ 
+"ssh-rsa PUBLIC_KEY"
+ 
+70.52.208.194
+ 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ 
+# Add resolv.conf only for controllers
+    if [ "$type" = "controllers" ]; then
+        cat >> "$output_file" << 'EOL'
+    - path: /etc/resolv.conf
+      overwrite: true
+      contents:
+        inline: |
+          nameserver 1.1.1.1
+          nameserver 1.0.0.1
+      mode: 0644 # Readable by all users
+EOL
+    fi
+ 
+
+    # Add resolv.conf only for controllers
+    if [ "$type" = "controllers" ]; then
+        cat >> "$output_file" << 'EOL'
+    - path: /etc/resolv.conf
+      overwrite: true
+      contents:
+        inline: |
+          nameserver 1.1.1.1
+          nameserver 1.0.0.1
+      mode: 0644 # Readable by all users
+EOL
+    fi
+ 
+
+    # Add resolv.conf only for controllers
+    if [ "$type" = "controllers" ]; then
+        cat >> "$output_file" << 'EOL'
+    - path: /etc/resolv.conf
+      overwrite: true
+      contents:
+        inline: |
+          nameserver 1.1.1.1
+          nameserver 1.0.0.1
+      mode: 0644 # Readable by all users
+EOL
+    fi
+ 
+no-xattrs
+ 
+--disable-resource-fork --exclude=".*"
+ 
+  vdc = var.vcd.vdc
+ 
+/*
+  rule {
+    name        = "Allow DHCP"
+    direction   = "IN_OUT"
+    ip_protocol = "IPV4"
+    action      = "ALLOW"
+    enabled     = true
+    logging     = true
+
+    source_ids      = [vcd_nsxt_ip_set.shared_net.id]
+
+    destination_ids = [vcd_nsxt_ip_set.kubernetes_net.id] 
+    app_port_profile_ids = [
+      vcd_nsxt_app_port_profile.dhcp.id,
+      vcd_nsxt_app_port_profile.dns.id
+    ]
+  }
+*/
+ 
+#- name: Add two IPv4 DNS server addresses
+#  nmcli:
+#    conn_name: ens192
+#    type: ethernet
+#    dns4:
+#      - "{{ ('bastion-vm' in group_names) | ternary('127.0.0.1', dns.forwarder1) }}"
+#      - "{{ dns.forwarder2 }}"
+#    dns4_search:
+#      - "{{ dns.clusterid }}.{{ dns.domain | lower }}"
+#      - "{{ dns.domain | lower }}"
+#    state: present
+#  notify: restart NetworkManager
+#  tags: resolv
+ 
+dnf install 
+ 
+# Correction du nom
+ 
+  dhcp_servers    = [var.networking.shared.ns_ips[0]]
+ 
+  org             = var.vcd.org
+
+  edge_gateway_id = data.vcd_nsxt_edgegateway.mygw.id
+
+  network_id      = vcd_network_routed_v2.kubernetes_net_routed.id
+
+  enabled         = true
+ 
+/*
+resource "vcd_nsxt_nat_rule" "ssh_dnat" {
+  org = var.vcd.org
+
+  edge_gateway_id = data.vcd_nsxt_edgegateway.mygw.id
+
+  name = "SSH DNAT"
+  rule_type = "DNAT"
+  description = "SSH DNAT"
+
+  external_address = var.vcd.external_network.ip
+  internal_address = var.networking.shared.jumpbox_ip
+  app_port_profile_id = data.vcd_nsxt_app_port_profile.ssh.id
+  dnat_external_port = "22"
+
+  firewall_match = "MATCH_EXTERNAL_ADDRESS"
+  enabled = true
+  logging = true
+}
+*/
+ 
+work_ip.id
+ 
+work_ip.id
+ 
+work_ip.id
+ 
+destination_ids = [vcd_nsxt_ip_set.kubernetes_net.id]
+ 
+destination_ids = [vcd_nsxt_ip_set.kubernetes_network_ip.id]
+ 
+ destination_ids = [vcd_nsxt_ip_set.shared_net.id]
+ 
+kubernetes_net.id]
+ 
+resource "vcd_nsxt_nat_rule" "allow_dhcp" {
+  org = var.vcd.org
+
+  edge_gateway_id = data.vcd_nsxt_edgegateway.mygw.id
+
+  name = "Allow DHCP"
+  rule_type = "DNAT"
+  description = "Allow DHCP"
+
+  external_address = var.vcd.external_network.ip
+  internal_address = var.networking.kubernetes.subnet
+  app_port_profile_id = vcd_nsxt_app_port_profile.dhcp.id
+  
+  firewall_match = "MATCH_EXTERNAL_ADDRESS"
+  enabled = true
+  logging = true  
+  
+}
+ 
+vcd_nsxt_app_port_profile.dns.id, 
+ 
+  dnat_external_port = "67" 
+ 
+  dnat_external_port = "68" # Uncomment if needed
+ 
+  app_port_profile_id = vcd_nsxt_app_port_profile.dhcp.id
+ 
+  dnat_external_port = "67"
+ 
+    destination_ids = [vcd_nsxt_ip_set.kubernetes_net.id] 
+ 
+&& sudo -i -u {{ item }} -- 
+ 
+ /home/{{ item }}/cirrus-kubernetes-vcd/
+ 
+    if [ -f "$config_file" ]; then
+ 
+        fi
+ 
+        sudo -i -u {{ item }} -- sh init.sh &&
+        tofu plan && 
+        tofu apply -auto-approve
+ 
+&& tofu plan && tofu apply -auto-approve
+ 
+tofu apply -auto-approve
+ 
+find . -maxdepth 1 -name "*.config" | head -n 1
+ 
+find . -maxdepth 1 -name "*.config" | head -n 1
+ 
+find . -maxdepth 1 -name "*.config" | head -n 1
+ 
+# or the IP set of your DHCP server
+ 
+
+# Add IP set for Any
+resource "vcd_nsxt_ip_set" "any_net" {
+  name = "any_net"
+  description = "IP set for Any"
+  org  = var.vcd.org
+  edge_gateway_id = data.vcd_nsxt_edgegateway.mygw.id
+  ip_addresses = ["0.0.0.0/0"]
+}
+ 
+# Retrieve native application port profiles for standard services
+ 
+Outbound - S
+ 
+Outbound - Shared
+ 
+# NSX-T Firewall Rules
+resource "vcd_nsxt_firewall" "shared_to_kubernetes" {
+  org             = var.vcd.org
+  edge_gateway_id = data.vcd_nsxt_edgegateway.mygw.id
+
+
+
+  # Rule 5: Shared to Transit
+  rule {
+    name            = "shared to transit"
+    direction       = "IN_OUT"
+    ip_protocol     = "IPV4"
+    action          = "ALLOW"
+    enabled         = true
+    logging         = true
+
+    source_ids      = [vcd_nsxt_ip_set.shared_net.id]
+    destination_ids = [vcd_nsxt_ip_set.transit_net.id]
+    app_port_profile_ids = [
+      vcd_nsxt_app_port_profile.dns.id,
+      vcd_nsxt_app_port_profile.ntp.id,
+      data.vcd_nsxt_app_port_profile.http.id
+    ]
+  }
+}
+ 
+
+   # Rule 5: Shared to Transit
+  rule {
+    name            = "shared to transit"
+    direction       = "IN_OUT"
+    ip_protocol     = "IPV4"
+    action          = "ALLOW"
+    enabled         = true
+    logging         = true
+
+    source_ids      = [vcd_nsxt_ip_set.shared_net.id]
+    destination_ids = [vcd_nsxt_ip_set.transit_net.id]
+    app_port_profile_ids = [
+      vcd_nsxt_app_port_profile.dns.id,
+      vcd_nsxt_app_port_profile.ntp.id,
+      data.vcd_nsxt_app_port_profile.http.id
+    ]
+  }
+ 
+# Rule 3: Transit to Shared
+  rule {
+    name            = "transit to shared"
+    direction       = "IN_OUT"
+    ip_protocol     = "IPV4"
+    action          = "ALLOW"
+    enabled         = true
+    logging         = true
+
+    source_ids      = [vcd_nsxt_ip_set.transit_net.id]
+    destination_ids = [vcd_nsxt_ip_set.shared_net.id]
+    app_port_profile_ids = [
+      vcd_nsxt_app_port_profile.dns.id,
+      vcd_nsxt_app_port_profile.ntp.id,
+      data.vcd_nsxt_app_port_profile.http.id
+    ]
+  }
+ 
+# Rule 1: Shared to Kubernetes
+  rule {
+    name        = "shared to kubernetes"
+    direction   = "IN_OUT"
+    ip_protocol = "IPV4"
+    action      = "ALLOW"
+    enabled     = true
+    logging     = true
+    
+    source_ids  = [vcd_nsxt_ip_set.shared_net.id]
+
+    destination_ids = [vcd_nsxt_ip_set.kubernetes_net.id] 
+    app_port_profile_ids = [
+      vcd_nsxt_app_port_profile.dns.id,
+      vcd_nsxt_app_port_profile.dhcp.id,
+      vcd_nsxt_app_port_profile.ntp.id,
+      data.vcd_nsxt_app_port_profile.http.id,
+      vcd_nsxt_app_port_profile.http_8080.id
+    ]
+  }
+ 
+  # Rule 2: Kubernetes to Shared
+  rule {
+    name            = "kubernetes to shared"
+    direction       = "IN_OUT"
+    ip_protocol     = "IPV4"
+    action          = "ALLOW"
+    enabled         = true
+    logging         = true
+
+    source_ids      = [vcd_nsxt_ip_set.kubernetes_net.id]
+    destination_ids = [vcd_nsxt_ip_set.shared_net.id]
+    app_port_profile_ids = [
+      vcd_nsxt_app_port_profile.dns.id,
+      vcd_nsxt_app_port_profile.dhcp.id,
+      vcd_nsxt_app_port_profile.ntp.id,
+      vcd_nsxt_app_port_profile.http_8080.id
+    ]
+  }
+ 
+ app_port_profile_ids = [
+      data.vcd_nsxt_app_port_profile.http.id,
+      data.vcd_nsxt_app_port_profile.https.id,
+      vcd_nsxt_app_port_profile.api.id
+    ]
+ 
+Générer une paire de clés SSH pour chaque utilisateur du groupe cirrus-admin
+ 
+[${FLATCAR_DNS_ADDRESSES//,/","}]
+ 
+flatcar_
+ 
+ ${KUBERNETES_DNS2}"
+ 
+-storag
+ 
+        group: "{{ item }}"
+ 
+"172.20.20.103"
+ 
+[${WORKER_MACS_JOINED}]
+ 
+control_plane_mac_address = [${MASTER_MACS_JOINED}]
+ 
+"$(printf '"%s", ' "${NFS_COMPUTE_IP_ADDRESSES[*]}" | sed 's/, $//')"]
+ 
+"$(printf '"%s", ' "${WORKERS_IPADDR[*]}")"]
+ 
+readarray -t MASTER_MACS < <(printf '"%s"' "${MASTERS_MACADDR[@]}")
+MASTER_MACS_JOINED=$(IFS=', '; echo "${MASTER_MACS[*]}")
+
+readarray -t WORKER_MACS < <(printf '"%s"' "${WORKERS_MACADDR[@]}")
+WORKER_MACS_JOINED=$(IFS=', '; echo "${WORKER_MACS[*]}")
+ 
+joined_dns=$(printf '"%s", ' "${[@]}")
+#joined_dns=${joined_dns%, }
+
+ 
+read -ra DNS_ARRAY <<< "${FLATCAR_DNS_ADDRESSES}"
+joined_dns=$(printf '"%s", ' "${DNS_ARRAY[@]}")
+joined_dns=${joined_dns%, } # Remove trailing comma and space
+ 
+control_plane_ip_addresses = ["$(printf '"%s", ' "${MASTERS_IPADDR[*]}" | sed 's/, $//')"]
+ 
+// DNS addresses for the cluster. This is used to create the DNS records for the cluster.
+dns_addresses = [${joined_dns}]
+#dns_addresses = ["$(printf '"%s", ' "${FLATCAR_DNS_ADDRESSES[*]}" | sed 's/, $//')"]
+ 
+dns_addresses = ["172.16.0.15 1.1.1.1 1.0.0.1"]
+ 
+FLATCAR_DNS_ADDRESSES
+ 
+compute_compute_mac_addresses = [""00:50:56:1f:03:a1
+00:50:56:1f:03:9b
+00:50:56:1f:03:a2""]
+ 
+)"
+ 
+compute_compute_mac_addresses = ["00:50:56:1f:03:a1,00:50:56:1f:03:9b,00:50:56:1f:03:a2"]
+ 
+-flatcar_terraform
+ 
+CL
+ 
+export FLATCAR_CATALOG="Flatcar-stable-1.20.0"
+ 
+ns-cirrus
+ 
+become: yes
+  vars:
+    cirrus_admin: []  # Define the list of users in the cirrus-admin group
+ 
+{{ cirrus_admin }}
+ 
+- name: Décompresser l'archive dans le répertoire de chaque utilisateur du groupe cirrus-admin
+ 
+args:
+        executable: /bin/bash
+ 
+ens
+ 
+${JUMPBOX_IP}
+ 
+  - gcc
+ 
+  configure_ansible
+ 
+  configure_ansible
+ 
+
+  # Rule 4: Shared Outbound
+  rule {
+    name            = "Shared - Outbound"
+    direction       = "OUT"
+    ip_protocol     = "IPV4"
+    action          = "ALLOW"
+    enabled         = true
+    logging         = true
+
+    source_ids      = [vcd_nsxt_ip_set.shared_net.id]
+    destination_ids = [vcd_nsxt_ip_set.any_net.id]
+    app_port_profile_ids = [
+      vcd_nsxt_app_port_profile.dns.id,
+      vcd_nsxt_app_port_profile.ntp.id,
+      data.vcd_nsxt_app_port_profile.http.id
+    ]
+  }
+ 
+  when: ansible_selinux.status == "enabled"
+ 
+{% if bootstrap is defined %}
+    server {{ bootstrap.name | lower }} {{ bootstrap.ipaddr }}:6443 check
+{% endif %}
+ 
+frontend machine-config-server
+    bind *:22623
+    default_backend machine-config-server
+    option tcplog
+
+backend machine-config-server
+    balance source
+{% if bootstrap is defined %}
+    server {{ bootstrap.name | lower }} {{ bootstrap.ipaddr }}:22623 check
+{% endif %}
+{% for m in masters %}
+    server {{ m.name | lower }} {{ m.ipaddr }}:22623 check
+{% endfor %}
+ 
+frontend machine-config-server
+    bind *:22623
+    default_backend machine-config-server
+    option tcplog
+
+backend machine-config-server
+    balance source
+{% if bootstrap is defined %}
+    server {{ bootstrap.name | lower }} {{ bootstrap.ipaddr }}:22623 check
+{% endif %}
+{% for m in masters %}
+    server {{ m.name | lower }} {{ m.ipaddr }}:22623 check
+{% endfor %}
+ 
+ app_port_profile_ids = [
+      data.vcd_nsxt_app_port_profile.http.id,
+      data.vcd_nsxt_app_port_profile.https.id,
+      vcd_nsxt_app_port_profile.api.id
+    ]
+ 
+   app_port_profile_ids = [
+      data.vcd_nsxt_app_port_profile.http.id,
+      data.vcd_nsxt_app_port_profile.https.id,
+      vcd_nsxt_app_port_profile.api.id
+    ]
+ 
+#configure_ansible() {
+#  run_step "Configuration via Ansible" \
+#    "(cd ${ANSIBLE_DIR} && ansible-playbook -e @vars/${DNS_CLUSTER_ID}/config.yaml -i inventory/${DNS_CLUSTERID}-inventory tasks/main.yml -e 'ansible_python_interpreter=/usr/bin/python3.9')"
+#}
+ 
+#- name: Add Docker repository
+#  command: dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker-ce.repo
+
+#- name: Install Docker
+#  yum: 
+#    name: 
+#      - docker-ce 
+#      - docker-ce-cli 
+#      - containerd.io 
+#      - docker-buildx-plugin 
+#      - docker-compose-plugin
+#    state: present
+#  tags: docker
+
+#- name: Add user to docker group
+#  user:
+#    name: "{{ item }}"
+#    group: docker
+#    append: yes
+#  with_items: "{{ cirrus_admin }}"
+#  tags: docker
+#  ignore_errors: true
+
+#- name: Start Docker
+#  systemd:
+#    name: docker
+#    state: started
+#    enabled: yes
+#  tags: docker
+ 
+de
+ 
+f
+ 
+
+- name: Certbot renew test script
+  template:
+    src: certbot_renew_test.j2
+    dest: /home/cirrus/certbot/renew_test.sh
+    mode: '0750'
+    owner: "cirrus"
+  tags: certbot
+ 
+- name: Certbot create test script
+  template:
+    src: certbot_create_test.j2
+    dest: /home/cirrus/certbot/create_test.sh
+    mode: '0750'
+    owner: "cirrus"
+  tags: certbot
+ 
+    app_port_profile_ids = [
+      data.vcd_nsxt_app_port_profile.http.id,
+      data.vcd_nsxt_app_port_profile.https.id,
+      vcd_nsxt_app_port_profile.api.id
+    ]
+ 
+
+[jumpbox]
+jumpbox-dev_nsxt ansible_host=${EXTERNAL_NETWORK_IP} ansible_user=$(whoami) ansible_port=8446
+ 
+#[bastion]
+#bastion-_nsxt  ansible_host=172.16.0.15 ansible_user=czogbelemou
+ 
+ansible_port=8446
+ 
+ansible_port=8446
+ 
+he
+ 
+  
+     state: present
+ 
+  repo_url: https://download.docker.com/linux/rhel/docker-ce.repo
+ 
+  dnf_repo:
+    name: docker-ce
+ 
+resource "vcd_nsxt_nat_rule" "ssh_dnat" {
+  org = var.vcd.org
+
+  edge_gateway_id = data.vcd_nsxt_edgegateway.mygw.id
+
+  name = "SSH DNAT"
+  rule_type = "DNAT"
+  description = "SSH DNAT"
+
+  external_address = var.vcd.external_network.ip
+  internal_address = var.networking.shared.jumpbox_ip
+  app_port_profile_id = data.vcd_nsxt_app_port_profile.ssh.id
+  dnat_external_port = "22"
+
+  firewall_match = "MATCH_EXTERNAL_ADDRESS"
+  enabled = true
+  logging = true
+}
+ 
+resource "vcd_nsxt_nat_rule" "ssh_dnat_jumpbox" {
+  org                 = var.vcd.org
+
+  edge_gateway_id     = data.vcd_nsxt_edgegateway.mygw.id
+
+  name                = "SSH DNAT Jumpbox"
+  rule_type           = "DNAT"
+  description         = "SSH Jumpbox"
+  
+  external_address    = var.vcd.external_network.ip
+  internal_address    = var.networking.shared.jumpbox_ip
+  app_port_profile_id = data.vcd_nsxt_app_port_profile.ssh.id
+  dnat_external_port  = "8446"
+ 
+  firewall_match      = "MATCH_EXTERNAL_ADDRESS"
+  enabled             = true
+  logging             = true
+}
+ 
+"vcd_nsxt_firewall" "kubernetes-inbound"
+ 
+output "haproxy_admin_inbound_details" {
+  value = {
+    id          = vcd_nsxt_firewall.haproxy-admin-inbound.id
+    name        = "haproxy-admin-inbound"
+    description = "HAProxy admin inbound rule"
+    source_ids  = vcd_nsxt_firewall.haproxy-admin-inbound.rule[0].source_ids
+    destination_ids = vcd_nsxt_firewall.haproxy-admin-inbound.rule[0].destination_ids
+    app_port_profile_ids = vcd_nsxt_firewall.haproxy-admin-inbound.rule[0].app_port_profile_ids
+  }
+  description = "Details of the HAProxy admin inbound firewall rule"
+}
+
+output "jumpbox_ssh_inbound_details" {
+  value = {
+    id          = vcd_nsxt_firewall.jumpbox-ssh-inbound.id
+    name        = "jumpbox-ssh-inbound"
+    description = "Jumpbox SSH inbound rule"
+    source_ids  = vcd_nsxt_firewall.jumpbox-ssh-inbound.rule[0].source_ids
+    destination_ids = vcd_nsxt_firewall.jumpbox-ssh-inbound.rule[0].destination_ids
+    app_port_profile_ids = vcd_nsxt_firewall.jumpbox-ssh-inbound.rule[0].app_port_profile_ids
+  }
+  description = "Details of the Jumpbox SSH inbound firewall rule"
+}
+
+output "transit_to_kubernetes_details" {
+  value = {
+    id          = vcd_nsxt_firewall.transit-to-kubernetes.id
+    name        = "transit-to-kubernetes"
+    description = "Transit to Kubernetes rule"
+    source_ids  = vcd_nsxt_firewall.transit-to-kubernetes.rule[0].source_ids
+    destination_ids = vcd_nsxt_firewall.transit-to-kubernetes.rule[0].destination_ids
+    app_port_profile_ids = vcd_nsxt_firewall.transit-to-kubernetes.rule[0].app_port_profile_ids
+  }
+  description = "Details of the Transit to Kubernetes firewall rule"
+}
+
+output "api_external_access_details" {
+  value = {
+    id          = vcd_nsxt_firewall.api-external-access.id
+    name        = "api-external-access"
+    description = "API external access rule"
+    source_ids  = vcd_nsxt_firewall.api-external-access.rule[0].source_ids
+    destination_ids = vcd_nsxt_firewall.api-external-access.rule[0].destination_ids
+    app_port_profile_ids = vcd_nsxt_firewall.api-external-access.rule[0].app_port_profile_ids
+  }
+  description = "Details of the API external access firewall rule"
+}
+
+output "lb_traffic_details" {
+  value = {
+    id          = vcd_nsxt_firewall.lb-traffic.id
+    name        = "lb-traffic"
+    description = "Load Balancer traffic rule"
+    source_ids  = vcd_nsxt_firewall.lb-traffic.rule[0].source_ids
+    destination_ids = vcd_nsxt_firewall.lb-traffic.rule[0].destination_ids
+    app_port_profile_ids = vcd_nsxt_firewall.lb-traffic.rule[0].app_port_profile_ids
+  }
+  description = "Details of the Load Balancer traffic firewall rule"
+}
+
+output "kubernetes_to_shared_details" {
+  value = {
+    id          = vcd_nsxt_firewall.kubernetes-to-shared.id
+    name        = "kubernetes-to-shared"
+    description = "Kubernetes to Shared rule"
+    source_ids  = vcd_nsxt_firewall.kubernetes-to-shared.rule[0].source_ids
+    destination_ids = vcd_nsxt_firewall.kubernetes-to-shared.rule[0].destination_ids
+    app_port_profile_ids = vcd_nsxt_firewall.kubernetes-to-shared.rule[0].app_port_profile_ids
+  }
+  description = "Details of the Kubernetes to Shared firewall rule"
+}
+
+output "shared_to_kubernetes_details" {
+  value = {
+    id          = vcd_nsxt_firewall.shared-to-kubernetes.id
+    name        = "shared-to-kubernetes"
+    description = "Shared to Kubernetes rule"
+    source_ids  = vcd_nsxt_firewall.shared-to-kubernetes.rule[0].source_ids
+    destination_ids = vcd_nsxt_firewall.shared-to-kubernetes.rule[0].destination_ids
+    app_port_profile_ids = vcd_nsxt_firewall.shared-to-kubernetes.rule[0].app_port_profile_ids
+  }
+  description = "Details of the Shared to Kubernetes firewall rule"
+}
+
+output "transit_outbound_details" {
+  value = {
+    id          = vcd_nsxt_firewall.transit-outbound.id
+    name        = "transit-outbound"
+    description = "Transit outbound rule"
+    source_ids  = vcd_nsxt_firewall.transit-outbound.rule[0].source_ids
+    destination_ids = vcd_nsxt_firewall.transit-outbound.rule[0].destination_ids
+    app_port_profile_ids = vcd_nsxt_firewall.transit-outbound.rule[0].app_port_profile_ids
+  }
+  description = "Details of the Transit outbound firewall rule"
+}
+
+output "kubernetes_outbound_details" {
+  value = {
+    id          = vcd_nsxt_firewall.kubernetes-outbound.id
+    name        = "kubernetes-outbound"
+    description = "Kubernetes outbound rule"
+    source_ids  = vcd_nsxt_firewall.kubernetes-outbound.rule[0].source_ids
+    destination_ids = vcd_nsxt_firewall.kubernetes-outbound.rule[0].destination_ids
+    app_port_profile_ids = vcd_nsxt_firewall.kubernetes-outbound.rule[0].app_port_profile_ids
+  }
+  description = "Details of the Kubernetes outbound firewall rule"
+}
+
+ 
+}
+
+resource "vcd_nsxt_firewall" "kubernetes-outbound" {
+  org             = var.vcd.org
+
+  edge_gateway_id = data.vcd_nsxt_edgegateway.mygw.id
+ 
+
+resource "vcd_nsxt_firewall" "transit-outbound" {
+  org             = var.vcd.org
+
+  edge_gateway_id = data.vcd_nsxt_edgegateway.mygw.id
+ 
+resource "vcd_nsxt_firewall" "shared-to-kubernetes" {
+  org             = var.vcd.org
+
+  edge_gateway_id = data.vcd_nsxt_edgegateway.mygw.id
+ 
+
+resource "vcd_nsxt_firewall" "kubernetes-to-shared" {
+  org             = var.vcd.org
+
+  edge_gateway_id = data.vcd_nsxt_edgegateway.mygw.id
+ 
+resource "vcd_nsxt_firewall" "lb-traffic" {
+  org             = var.vcd.org
+
+  edge_gateway_id = data.vcd_nsxt_edgegateway.mygw.id
+ 
+resource "vcd_nsxt_firewall" "api-external-access" {
+  org             = var.vcd.org
+
+  edge_gateway_id = data.vcd_nsxt_edgegateway.mygw.id
+ 
+resource "vcd_nsxt_firewall" "transit-to-kubernetes" {
+  org             = var.vcd.org
+
+  edge_gateway_id = data.vcd_nsxt_edgegateway.mygw.id
+ 
+resource "vcd_nsxt_firewall" "jumpbox-ssh-inbound" {
+  org             = var.vcd.org
+
+  edge_gateway_id = data.vcd_nsxt_edgegateway.mygw.id
+ 
+var.networking.kubernetes.dns_server[1]",
+ 
+firewall_match = "MATCH_INTERNAL_ADDRESS"
+ 
+firewall_match = "MATCH_INTERNAL_ADDRESS"
+ 
+firewall_match = "MATCH_INTERNAL_ADDRESS"
+ 
+firewall_match = "MATCH_INTERNAL_ADDRESS"
+ 
+firewall_match      = "MATCH_INTERNAL_ADDRESS"
+ 
+firewall_match = "MATCH_INTERNAL_ADDRESS"
+ 
+firewall_match = "MATCH_INTERNAL_ADDRESS"
+ 
+firewall_match = "MATCH_INTERNAL_ADDRESS"
+ 
+output "outbound_snat_kubernetes_details" {
+  value = {
+    id          = vcd_nsxt_nat_rule.outbound_snat_kubernetes.id
+    name        = vcd_nsxt_nat_rule.outbound_snat_kubernetes.name
+    description = vcd_nsxt_nat_rule.outbound_snat_kubernetes.description
+    internal    = vcd_nsxt_nat_rule.outbound_snat_kubernetes.internal_address
+    external    = vcd_nsxt_nat_rule.outbound_snat_kubernetes.external_address
+  }
+  description = "Details of the Outbound SNAT Kubernetes rule"
+}
+ 
+output "http_dnat_lb_details" {
+  value = {
+    id          = vcd_nsxt_nat_rule.http_dnat_lb.id
+    name        = vcd_nsxt_nat_rule.http_dnat_lb.name
+    description = vcd_nsxt_nat_rule.http_dnat_lb.description
+    external    = vcd_nsxt_nat_rule.http_dnat_lb.external_address
+    internal    = vcd_nsxt_nat_rule.http_dnat_lb.internal_address
+    port        = vcd_nsxt_nat_rule.http_dnat_lb.dnat_external_port
+  }
+  description = "Details of the HTTP DNAT Load Balancer rule"
+}
+ 
+output "https_dnat_lb_details" {
+  value = {
+    id          = vcd_nsxt_nat_rule.https_dnat_lb.id
+    name        = vcd_nsxt_nat_rule.https_dnat_lb.name
+    description = vcd_nsxt_nat_rule.https_dnat_lb.description
+    external    = vcd_nsxt_nat_rule.https_dnat_lb.external_address
+    internal    = vcd_nsxt_nat_rule.https_dnat_lb.internal_address
+    port        = vcd_nsxt_nat_rule.https_dnat_lb.dnat_external_port
+  }
+  description = "Details of the HTTPS DNAT Load Balancer rule"
+}
+ 
+output "outbound_snat_transit_details" {
+  value = {
+    id          = vcd_nsxt_nat_rule.outbound_snat_transit.id
+    name        = vcd_nsxt_nat_rule.outbound_snat_transit.name
+    description = vcd_nsxt_nat_rule.outbound_snat_transit.description
+    internal    = vcd_nsxt_nat_rule.outbound_snat_transit.internal_address
+    external    = vcd_nsxt_nat_rule.outbound_snat_transit.external_address
+  }
+  description = "Details of the Outbound SNAT Transit rule"
+}
+ 
+
+output "api_dnat_lb_details" {
+  value = {
+    id          = vcd_nsxt_nat_rule.api_dnat_lb.id
+    name        = vcd_nsxt_nat_rule.api_dnat_lb.name
+    description = vcd_nsxt_nat_rule.api_dnat_lb.description
+    external    = vcd_nsxt_nat_rule.api_dnat_lb.external_address
+    internal    = vcd_nsxt_nat_rule.api_dnat_lb.internal_address
+    port        = vcd_nsxt_nat_rule.api_dnat_lb.dnat_external_port
+  }
+  description = "Details of the API DNAT Load Balancer rule"
+}
+
+ 
+output "ssh_dnat_jumpbox_details" {
+  value = {
+    id          = vcd_nsxt_nat_rule.ssh_dnat_jumpbox.id
+    name        = vcd_nsxt_nat_rule.ssh_dnat_jumpbox.name
+    description = vcd_nsxt_nat_rule.ssh_dnat_jumpbox.description
+    external    = vcd_nsxt_nat_rule.ssh_dnat_jumpbox.external_address
+    internal    = vcd_nsxt_nat_rule.ssh_dnat_jumpbox.internal_address
+    port        = vcd_nsxt_nat_rule.ssh_dnat_jumpbox.dnat_external_port
+  }
+  description = "Details of the SSH DNAT Jumpbox rule"
+}
+ 
+"vcd_nsxt_nat_rule"
+ 
+# Firewall consolidé avec paramètres complets
+resource "vcd_nsxt_firewall" "haproxy-admin-inbound" {
+  org             = var.vcd.org
+
+  edge_gateway_id = data.vcd_nsxt_edgegateway.mygw.id
+
+  rule {
+    name        = "haproxy-admin-inbound"
+    direction   = "IN"
+    ip_protocol = "IPV4"
+    action      = "ALLOW"
+    enabled     = true
+    logging     = false
+
+    source_ids           = [vcd_nsxt_ip_set.allow_ssh_source.id]
+    destination_ids      = [vcd_nsxt_ip_set.external_network_ip.id]
+    app_port_profile_ids = [vcd_nsxt_app_port_profile.haproxyadmin.id]
+  }
+}
+
+resource "vcd_nsxt_firewall" "jumpbox-ssh-inbound" {
+  org             = var.vcd.org
+
+  edge_gateway_id = data.vcd_nsxt_edgegateway.mygw.id
+
+
+  rule {
+    name        = "jumpbox-ssh-inbound"
+    direction   = "IN"
+    ip_protocol = "IPV4"
+    action      = "ALLOW"
+    enabled     = true
+    logging     = false
+
+    source_ids           = [vcd_nsxt_ip_set.allow_ssh_source.id]
+    destination_ids      = [vcd_nsxt_ip_set.external_network_ip.id]
+    app_port_profile_ids = [vcd_nsxt_app_port_profile.custom_ssh_8446.id]  
+  }
+}
+
+resource "vcd_nsxt_firewall" "transit-to-kubernetes" {
+  org             = var.vcd.org
+
+  edge_gateway_id = data.vcd_nsxt_edgegateway.mygw.id
+  rule {
+    name        = "transit-to-kubernetes"
+    direction   = "IN_OUT"
+    ip_protocol = "IPV4"
+    action      = "ALLOW"
+    enabled     = true
+    logging     = false
+
+    source_ids      = [vcd_nsxt_ip_set.transit_network_ip.id]
+    destination_ids = [vcd_nsxt_ip_set.kubernetes_network_ip.id]
+    app_port_profile_ids = [
+      data.vcd_nsxt_app_port_profile.http.id,
+      data.vcd_nsxt_app_port_profile.https.id,
+      vcd_nsxt_app_port_profile.api.id
+    ]
+  }
+}
+
+resource "vcd_nsxt_firewall" "api-external-access" {
+  org             = var.vcd.org
+
+  edge_gateway_id = data.vcd_nsxt_edgegateway.mygw.id
+
+  rule {
+    name        = "api-external-access"
+    direction   = "IN"
+    ip_protocol = "IPV4"
+    action      = "ALLOW"
+    enabled     = true
+    logging     = false
+
+    source_ids           = [vcd_nsxt_ip_set.allow_ssh_source.id]
+    destination_ids      = [vcd_nsxt_ip_set.external_network_ip.id]
+    app_port_profile_ids = [vcd_nsxt_app_port_profile.api.id]
+  }
+}
+
+resource "vcd_nsxt_firewall" "lb-traffic" {
+  org             = var.vcd.org
+
+  edge_gateway_id = data.vcd_nsxt_edgegateway.mygw.id
+
+  rule {
+    name        = "lb-traffic"
+    direction   = "IN"
+    ip_protocol = "IPV4"
+    action      = "ALLOW"
+    enabled     = true
+    logging     = false
+
+    source_ids      = [vcd_nsxt_ip_set.any.id]
+    destination_ids = [vcd_nsxt_ip_set.external_network_ip.id]
+    app_port_profile_ids = [
+      data.vcd_nsxt_app_port_profile.http.id,
+      data.vcd_nsxt_app_port_profile.https.id,
+      vcd_nsxt_app_port_profile.api.id
+    ]
+  }
+}
+
+resource "vcd_nsxt_firewall" "kubernetes-to-shared" {
+  org             = var.vcd.org
+
+  edge_gateway_id = data.vcd_nsxt_edgegateway.mygw.id
+
+  rule {
+    name        = "kubernetes-to-shared"
+    direction   = "IN_OUT"
+    ip_protocol = "IPV4"
+    action      = "ALLOW"
+    enabled     = true
+    logging     = false
+
+    source_ids      = [vcd_nsxt_ip_set.kubernetes_network_ip.id]
+    destination_ids = [vcd_nsxt_ip_set.shared_network_ip.id]
+    app_port_profile_ids = [
+      data.vcd_nsxt_app_port_profile.http.id,
+      data.vcd_nsxt_app_port_profile.https.id,
+      vcd_nsxt_app_port_profile.api.id
+    ]
+  }
+}
+
+resource "vcd_nsxt_firewall" "shared-to-kubernetes" {
+  org             = var.vcd.org
+
+  edge_gateway_id = data.vcd_nsxt_edgegateway.mygw.id
+
+  rule {
+    name        = "shared-to-kubernetes"
+    direction   = "IN_OUT"
+    ip_protocol = "IPV4"
+    action      = "ALLOW"
+    enabled     = true
+    logging     = false
+
+    source_ids      = [vcd_nsxt_ip_set.shared_network_ip.id]
+    destination_ids = [vcd_nsxt_ip_set.kubernetes_network_ip.id]
+    app_port_profile_ids = [
+      data.vcd_nsxt_app_port_profile.http.id,
+      data.vcd_nsxt_app_port_profile.https.id,
+      vcd_nsxt_app_port_profile.api.id
+    ]
+  }
+}
+
+resource "vcd_nsxt_firewall" "transit-outbound" {
+  org             = var.vcd.org
+
+  edge_gateway_id = data.vcd_nsxt_edgegateway.mygw.id
+
+  rule {
+    name = "Transit - Outbound"
+    direction = "OUT"
+    ip_protocol = "IPV4"
+    action = "ALLOW"
+    enabled = true
+    logging = false
+    source_ids = [vcd_nsxt_ip_set.transit_network_ip.id]
+    destination_ids = [vcd_nsxt_ip_set.any.id]
+    app_port_profile_ids = [
+      data.vcd_nsxt_app_port_profile.http.id,
+      data.vcd_nsxt_app_port_profile.https.id,
+      vcd_nsxt_app_port_profile.api.id
+    ]
+  }
+}
+
+resource "vcd_nsxt_firewall" "kubernetes-outbound" {
+  org             = var.vcd.org
+
+  edge_gateway_id = data.vcd_nsxt_edgegateway.mygw.id
+  
+  rule {
+    name = "Kubernetes - Outbound"
+    direction = "OUT"
+    ip_protocol = "IPV4"
+    action = "ALLOW"
+    enabled = true
+    logging = false
+    source_ids = [vcd_nsxt_ip_set.kubernetes_network_ip.id]
+    destination_ids = [vcd_nsxt_ip_set.any.id]
+    app_port_profile_ids = [
+      data.vcd_nsxt_app_port_profile.http.id,
+      data.vcd_nsxt_app_port_profile.https.id,
+      vcd_nsxt_app_port_profile.api.id
+    ]
+  }
+}
+ 
+kubernetes-inbound
+ 
+/*
+resource "vcd_nsxt_nat_rule" "api_dnat_kubernetes" {
+  org = var.vcd.org
+
+  edge_gateway_id = data.vcd_nsxt_edgegateway.mygw.id
+
+  name = "API DNAT Kubernetes"
+  rule_type = "DNAT"
+  description = "API DNAT Kubernetes"
+
+  external_address = var.vcd.external_network.ip
+  internal_address = var.networking.kubernetes.api_ip
+  app_port_profile_id = vcd_nsxt_app_port_profile.api.id
+  dnat_external_port = "6443"
+
+  firewall_match = "MATCH_EXTERNAL_ADDRESS"
+  enabled = true
+  logging = true
+}
+*/
+ 
+     "1.0.0.1",
+ 
+      var.networking.shared.ns_ips[1],
+ 
+"vcd_nsxt_edgegateway_dns" "k8s_dns"
+ 
+resource "vcd_nsxt_edgegateway" "kube_dns_forwarding" {
+  org             = var.vcd.org
+
+  name = "kube-dns-forwarding"
+  description = "Kubernetes DNS Forwarding"
+  enabled = true
+
+  edge_gateway_id = data.vcd_nsxt_edgegateway.mygw.id
+ 
+  domain_names = [
+    "kube-stab.cirrus.appcirrus.ca",
+    "cirrus.appcirrus.ca"
+  ]
+  
+  upstream_dns_servers = [
+    var.networking.shared.ns_ips[0],
+    var.networking.shared.ns_ips[1]
+  ]
+  dns_forwarding_enabled = true
+}
+ 
+conditional_forwarder_zone {
+    name = "conditional_testing"
+
+    upstream_servers = [
+      "3.3.3.3",
+      "4.4.4.4",
+    ]
+ 
+data "vcd_org_vdc" "kube_dns_forwarding" {
+  org  = var.vcd.org
+  name = "kube-dns-forwarding"
+}
+
+data "vcd_nsxt_edgegateway" "testing-in-vdc" {
+  org      = "datacloud"
+  owner_id = data.vcd_org_vdc.v1.id
+
+  name = "nsxt-gw-datacloud"
+}
+ 
+name = 
+ 
+dns_forwarding {
+    enabled = true
+    dns_servers = [
+      var.networking.kubernetes.dns_server[0],
+      var.networking.kubernetes.dns_server[1]
+    ]
+  }
+ 
+  enabled        = true
+ 
+resource "vcd_nsxt_nat_rule" "outbound_snat_shared" {
+  org = var.vcd.org
+
+  edge_gateway_id = data.vcd_nsxt_edgegateway.mygw.id
+
+  name = "Outbound SNAT Shared"
+  rule_type = "SNAT"
+  description = "Outbound SNAT Shared"
+
+  internal_address = var.networking.shared.subnet
+  external_address = var.vcd.external_network.ip
+
+  firewall_match = "MATCH_INTERNAL_ADDRESS"
+  enabled = true
+  logging = true  
+}
+ 
+.networking
+ 
+ dnat_internal_port  = "22"
+
+ 
+state = "ACTIVE"
+ 
+rule {
+    name        = "kubernetes-to-shared"
+    direction   = "IN_OUT"
+    ip_protocol = "IPV4"
+    action      = "ALLOW"
+    enabled     = true
+    logging     = false
+
+    source_ids      = [vcd_nsxt_ip_set.kubernetes_network_ip.id]
+    destination_ids = [vcd_nsxt_ip_set.shared_network_ip.id]
+    app_port_profile_ids = [
+      data.vcd_nsxt_app_port_profile.http.id,
+      data.vcd_nsxt_app_port_profile.https.id,
+      vcd_nsxt_app_port_profile.api.id
+    ]
+  }
+ 
+ data.vcd_nsxt_app_port_profile.ssh.id,
+ 
+sh.id
+ 
+shared.lb_ip
+ 
+vcd_nsxt_ip_set.external_network_ip.id
+ 
+"jumpbox-ssh-inbound"
+ 
+vcd_nsxt_ip_set.external_network_ip.id]
+ 

@@ -1,0 +1,10 @@
+packages:
+  - vim
+  - screen
+  - python3-passlib
+  - netcat
+  - tar
+  - gcc
+  - python3-pip
+  - wget
+  - python3-jmespath

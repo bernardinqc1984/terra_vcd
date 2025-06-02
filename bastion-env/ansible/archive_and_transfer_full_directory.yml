@@ -1,0 +1,104 @@
+---
+- name: Archiver et transférer le répertoire complet vers bastion-vm
+  hosts: localhost
+  tasks:
+    - name: Archiver tout le répertoire cirrus-kubernetes-vcd
+      command: tar -czf /tmp/cirrus-kubernetes-vcd.tar.gz -C /Users/czogbelemou/Downloads/GIT-CIRRUS cirrus-kubernetes-vcd
+      register: archive_result
+
+    - name: Vérifier si l'archive a été créée
+      stat:
+        path: /tmp/cirrus-kubernetes-vcd.tar.gz
+      register: archive_stat
+
+    - name: Échouer si l'archive n'a pas été créée
+      fail:
+        msg: "L'archive n'a pas été créée correctement."
+      when: not archive_stat.stat.exists
+
+- name: Transférer et décompresser l'archive sur bastion-vm
+  hosts: bastion-vm
+  tasks:
+    - name: Créer un répertoire temporaire pour l'archive
+      file:
+        path: /tmp/cirrus_archive
+        state: directory
+        mode: '0755'
+
+    - name: 
+      become: true
+      become_user: "{{ item }}"
+      ansible.builtin.openssh_keypair:
+        path: "/home/{{ item }}/.ssh/id_rsa"
+        type: rsa
+        size: 4096
+        state: present
+        mode: '0600'
+        owner: "{{ item }}"
+        group: k8s
+      with_items: "{{ cirrus_admin }}"
+
+    - name: Transférer l'archive vers le serveur bastion-vm
+      copy:
+        src: /tmp/cirrus-kubernetes-vcd.tar.gz
+        dest: /tmp/cirrus_archive/cirrus-kubernetes-vcd.tar.gz
+
+    - name: Décompresser l'archive dans le répertoire de chaque utilisateur du groupe cirrus-admin
+      shell: |
+        mkdir -p /home/{{ item }}/cirrus-kubernetes-vcd;
+        tar -xzf /tmp/cirrus_archive/cirrus-kubernetes-vcd.tar.gz -C /home/{{ item }}/cirrus-kubernetes-vcd --strip-components=1 --exclude="._*";
+      with_items: "{{ cirrus_admin }}"
+      args:
+        executable: /bin/bash
+
+    - name: Changer le propriétaire du répertoire pour chaque utilisateur du groupe cirrus-admin
+      file:
+        path: /home/{{ item }}/cirrus-kubernetes-vcd
+        owner: "{{ item }}"
+        group: k8s
+        mode: '0755'
+        recurse: yes
+      with_items: "{{ cirrus_admin }}"
+
+
+    - name: Supprimer l'archive temporaire sur bastion-vm
+      file:
+        path: /tmp/cirrus_archive/cirrus-kubernetes-vcd.tar.gz
+        state: absent
+
+- name: Initialiser et appliquer tofu pour chaque utilisateur cirrus-admin
+  hosts: bastion-vm
+  tasks:
+    - name: S'assurer que le répertoire appartient à l'utilisateur avant l'init tofu
+      become: true
+      file:
+        path: "/home/{{ item }}/cirrus-kubernetes-vcd"
+        owner: "{{ item }}"
+        group: k8s
+        recurse: yes
+      with_items: "{{ cirrus_admin }}"
+
+    - name: Initialiser et appliquer tofu dans le répertoire cirrus-kubernetes-vcd
+      become: true
+      become_user: "{{ item }}"
+      shell: |
+        cd /home/{{ item }}/cirrus-kubernetes-vcd
+      with_items: "{{ cirrus_admin }}"
+
+    #- name: Initialiser et appliquer tofu dans le répertoire cirrus-kubernetes-vcd
+    #  become: true
+    #  become_user: "{{ item }}"
+    #  shell: |
+    #    cd /home/{{ item }}/cirrus-kubernetes-vcd
+    #    rm -rf ._*
+    #    config_file=$(find . -maxdepth 1 -name "*.config" | head -n 1 | sed 's|^\./||')
+    #    if [ -f "$config_file" ]; then
+    #      source "$config_file"
+    #    fi
+    #    sh init.sh
+    #    tofu plan
+    #    tofu apply -auto-approve
+    #  with_items: "{{ cirrus_admin }}"
+    #  args:
+    #    executable: /bin/bash
+    #    chdir: "/home/{{ item }}/cirrus-kubernetes-vcd"

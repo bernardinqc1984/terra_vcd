@@ -1,0 +1,13 @@
+packages:
+  - bind
+  - bind-utils
+  - bash-completion
+  - firewalld
+  - certbot
+  - yum-utils
+  - jq
+  - python39
+  - unzip
+
+dhcppkgs:
+  - dhcp-server
