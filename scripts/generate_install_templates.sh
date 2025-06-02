@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Source common functions
+source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+
 # Script to generate install.yaml.tmpl files for controllers and workers
 # This script should be run from the root directory of the project
 
@@ -12,6 +15,8 @@ readonly WORKERS_DIR="${SCRIPT_DIR}/../workers"
 generate_template() {
     local type=$1
     local output_file=$2
+    
+    log_info "Generating template for ${type}: ${output_file}"
     
     cat > "$output_file" << 'EOL'
 ---
@@ -53,23 +58,27 @@ systemd:
             ExecStart=
             ExecStart=-/sbin/agetty --noclear %I $TERM
 EOL
+
+    # Generate ignition file from template
+    log_info "Generating ignition file for ${type}"
+    if ! docker run -i --rm quay.io/coreos/fcct --pretty --strict <"${output_file}" > "${output_file%.tmpl}.ign"; then
+        handle_error 1 "Failed to generate ignition file for ${type}"
+    fi
 }
 
 # Main script execution
-echo "Generating install.yaml.tmpl files..."
+log_info "Generating install.yaml.tmpl files..."
+
+# Create directories if they don't exist
+ensure_directory "${CONTROLLERS_DIR}"
+ensure_directory "${WORKERS_DIR}"
 
 # Generate controller template
 generate_template "controllers" "${CONTROLLERS_DIR}/install.yaml.tmpl"
-echo "Generated ${CONTROLLERS_DIR}/install.yaml.tmpl"
-
-# Generate controller ignition file from template
-docker run -i --rm quay.io/coreos/fcct --pretty --strict <${CONTROLLERS_DIR}/install.yaml.tmpl > ${CONTROLLERS_DIR}/install.ign
+log_success "Generated ${CONTROLLERS_DIR}/install.yaml.tmpl"
 
 # Generate worker template
 generate_template "workers" "${WORKERS_DIR}/install.yaml.tmpl"
-echo "Generated ${WORKERS_DIR}/install.yaml.tmpl"
+log_success "Generated ${WORKERS_DIR}/install.yaml.tmpl"
 
-# Generate worker ignition file from template
-docker run -i --rm quay.io/coreos/fcct --pretty --strict <${WORKERS_DIR}/install.yaml.tmpl > ${WORKERS_DIR}/install.ign
-
-echo "Template generation completed successfully!" 
+log_success "Template generation completed successfully!" 
