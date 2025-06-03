@@ -61,7 +61,7 @@ EOL
 
     # Generate ignition file from template
     log_info "Generating ignition file for ${type}"
-    if ! docker run -i --rm quay.io/coreos/fcct --pretty --strict <"${output_file}" > "${output_file%.tmpl}.ign"; then
+    if ! docker run -i --rm quay.io/coreos/fcct --pretty --strict <"${output_file}" > "$(dirname "${output_file}")/install.ign"; then
         handle_error 1 "Failed to generate ignition file for ${type}"
     fi
 }
