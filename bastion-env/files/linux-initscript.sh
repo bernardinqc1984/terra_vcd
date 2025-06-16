@@ -58,9 +58,9 @@ elif [ "$1" = "postcustomization" ]; then
 
 # Users list with their ssh key
   declare -A users=(
-    ["cirrus"]="ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1MjEAAACFBAAf26Toc0COQzC/R5wrR8xOcWqbJF0DCFIIepgOy+LzCOWXo3/XBsgx5q5dF0CWma0Mrk5VQWDcQlUcGK0y8sTSWQAgQhkiGvfczt+fUOIJUyiTyb+HopBNLwG7z/I7Bem4HNWcG9/GsoCNv4R/MSnHaS+N8S9rx14dENM50WYuNv37ow== cirrus"
-    ["czogbelemou"]="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDAoE8zKmJblNMyplKs75DJwfIf1PjuLjOxSFxV0LOAbiaiuyypi485EzXJALP+GD5wultiC4/wB2Rfv7e1OPJ2zNbdldwASFwrRwmslDOxsI6a8hnJaLdf5cu/kE6ZWIR2MOMfE+ISJ6K7EkVQ/d1dAJJoTM3KUKTgvrKdXZGKoTRveDICm+1e7Cka2CigfMBefDi4VkTksoH1rTL3EBi1MMyVppZLVw5wAykutbGesQzLl7FciTsBpw5JhW19BSTw/jv9GFdegbVxVE/3MVr/UEFlRmqEBN61YT58bMb0KuAFEaznyE3P5BrKjADtebwZJR3FrKeq2c2yx3cTvq0QKmJtA/94QtXC4mUzsLNhDjFB832jKqpTqLTM30ekGv/TNw3TgHASlpBCADz+pV6NRc/c478qX1+OLN2eVAmIiuvwdOFAwfqR0lZy5ot2YSIo+NlShvIclbGxH8FcDTVFX1ysipJ84AXQ3lSKEkhOtZ7judW4DjBspqjly8hqLEE= czogbelemou@Charless-MacBook-Pro.local"
-    ["mcharette"]="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDZz3z1Z.................."
+    ["user1"]="ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbml"
+    ["user2"]="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDAoE8zKmJblNMypl"
+    ["user3"]="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDZz3z1Z.................."
   )
 
 # Loop to create the users
